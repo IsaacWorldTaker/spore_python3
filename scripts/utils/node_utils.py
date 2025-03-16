@@ -86,7 +86,7 @@ def get_transformfn_from_dagpath(dagpath):
 
 
 def get_instanced_geo(spore_node):
-    """ return a list of dag pathes of geometry transformes that
+    """ return a list of dag paths of geometry transforms that
     are connected to the spore node's instancer
     @param spore_node str: the name of the spore node
     @return: list of string or None if no instancer is connected """
@@ -104,7 +104,7 @@ def get_instanced_geo(spore_node):
             inst_geo_plug = node_fn.findPlug('inputHierarchy')
 
             if not inst_geo_plug.isNull():
-                for i in xrange(inst_geo_plug.numConnectedElements()):
+                for i in range(inst_geo_plug.numConnectedElements()):
                     input_plug = inst_geo_plug.elementByPhysicalIndex(i)
 
                     if input_plug.connectedTo(instancer_plugs, True, True):
@@ -162,7 +162,7 @@ def get_connected_in_mesh(spore_node, as_string=True):
     to the given spore node """
 
     # TODO - error when node name is not unique!
-    if isinstance(spore_node, str) or isinstance(spore_node, unicode):
+    if isinstance(spore_node, str):
         node_fn = get_dgfn_from_dagpath(spore_node)
     elif isinstance(spore_node, om.MObject):
         node_fn = om.MFnDependencyNode(spore_node)

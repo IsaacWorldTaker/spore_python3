@@ -87,7 +87,7 @@ class SporeCommand(ompx.MPxCommand):
 
         # get source matrix plugs
         matrix_plug_array = om.MPlugArray()
-        for i in xrange(self.source.length()):
+        for i in range(self.source.length()):
             dag_fn = om.MFnDagNode(self.source[i])
             matrix_plug = dag_fn.findPlug('matrix')
             matrix_plug_array.append(matrix_plug)
@@ -95,7 +95,7 @@ class SporeCommand(ompx.MPxCommand):
         # hook everything up
         self.dag_mod_spore.connect(instance_data_plug, in_points_plug)
         self.dag_mod_spore.connect(out_mesh_plug, in_mesh_plug)
-        for i in xrange(matrix_plug_array.length()):
+        for i in range(matrix_plug_array.length()):
             in_plug = in_hierarchy_plug.elementByLogicalIndex(i)
             self.dag_mod_spore.connect(matrix_plug_array[i], in_plug)
 
@@ -149,13 +149,15 @@ class SporeCommand(ompx.MPxCommand):
 
         selection = om.MSelectionList()
         arg_data.getObjects(selection)
-
+        if not arg_data:
+            self.logger.error('No arguments provided')
+            return False
         #  # check if we got at least on item
         if selection.length() == 0:
             self.logger.error('Spore Command failed: Nothing Selected')
             return False
 
-        for i in xrange(selection.length()):
+        for i in range(selection.length()):
             dag_path = om.MDagPath()
             selection.getDagPath(i, dag_path)
 

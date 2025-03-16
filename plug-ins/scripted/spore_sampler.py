@@ -28,7 +28,7 @@ K_MIN_DISTANCE_FLAG = '-r'
 K_MIN_DISTANCE_LONG_FLAG = '-minimumRadius'
 
 class Points(object):
-    """ conatainer for sampled points.
+    """ container for sampled points.
     holds position, normal, polyid and uv coords """
 
     def __init__(self):
@@ -69,7 +69,7 @@ class Points(object):
     def __iter__(self):
         """ iterate overer the sampled points """
 
-        for i in xrange(self.position.length()):
+        for i in range(self.position.length()):
             yield ((self.position[i].x, # position
                     self.position[i].y,
                     self.position[i].z),
@@ -128,34 +128,44 @@ class SporeSampler(ompx.MPxCommand):
         self.ids = None
 
     def doIt(self, args):
+        try:
+            self.parse_args(args)
+            self.get_settings()
 
-        self.parse_args(args)
-        self.get_settings()
-
-        # check if we can find a geo cache on the node we operate on
-        # else build a new one
-        obj_handle = om.MObjectHandle(self.target)
-        if hasattr(sys, '_global_spore_tracking_dir'):
-            if sys._global_spore_tracking_dir.has_key(obj_handle.hashCode()):
-                spore_locator = sys._global_spore_tracking_dir[obj_handle.hashCode()]
-                self.geo_cache = spore_locator.geo_cache
-                self.instance_data = spore_locator._state
+            # check if we can find a geo cache on the node we operate on
+            # else build a new one
+            obj_handle = om.MObjectHandle(self.target)
+            if hasattr(sys, '_global_spore_tracking_dir'):
+                if  obj_handle.hashCode() in sys._global_spore_tracking_dir:
+                    spore_locator = sys._global_spore_tracking_dir[obj_handle.hashCode()]
+                    self.geo_cache = spore_locator.geo_cache
+                    self.instance_data = spore_locator._state
+                else:
+                    raise RuntimeError('Could not link to spore node')
             else:
-                raise RuntimeError('Could not link to spore node')
-        else:
-            raise RuntimeError('There is no sporeNode in the scene')
+                raise RuntimeError('There is no sporeNode in the scene')
 
-        self.initialize_sampling()
-        self.initialize_filtering()
+            self.initialize_sampling()
+            self.initialize_filtering()
 
-        self.redoIt()
+            self.redoIt()
+        except Exception as e:
+            print('----> Error in doing it at {}: {}'.format(e.__traceback__.tb_lineno, e))
 
     def redoIt(self):
+        try:
+            print('redoing it')
+            self.append_points()
 
-        self.append_points()
-
-        #  ompx.MPxCommand.clearResult()
-        #  ompx.MPxCommand.setResult(['foo', 'bar', 1, 2,])
+            # Return some result to indicate success
+            ompx.MPxCommand.clearResult()
+            ompx.MPxCommand.setResult(True)  # or some meaningful result
+        except Exception as e:
+            import traceback
+            print(f"Error in redoIt(): {str(e)}")
+            print(traceback.format_exc())
+            ompx.MPxCommand.clearResult()
+            ompx.MPxCommand.setResult(False)
 
     def undoIt(self):
         visibility = om.MIntArray()
@@ -172,40 +182,45 @@ class SporeSampler(ompx.MPxCommand):
         return True
 
     def initialize_sampling(self):
-        self.point_data = Points()
+        try:
+            self.point_data = Points()
+            print('choosing')
+            print('mode', self.mode)
+            # choose sample operation
+            if self.mode == 0: #'random':
+                self.random_sampling(self.num_samples)
 
-        # choose sample operation
-        if self.mode == 0: #'random':
-            self.random_sampling(self.num_samples)
+            elif self.mode == 1: #'jitter':
+                self.random_sampling(self.num_samples)
+                grid_partition = self.voxelize(self.cell_size)
+                valid_points = self.grid_sampling(grid_partition)
 
-        elif self.mode == 1: #'jitter':
-            self.random_sampling(self.num_samples)
-            grid_partition = self.voxelize(self.cell_size)
-            valid_points = self.grid_sampling(grid_partition)
+            elif self.mode == 2: #'poisson3d':
+                self.random_sampling(self.num_samples)
+                self.cell_size = self.min_radius // math.sqrt(3)
+                grid_partition = self.voxelize(self.cell_size)
+                valid_points = self.disk_sampling_3d(self.min_radius, grid_partition, self.cell_size)
 
-        elif self.mode == 2: #'poisson3d':
-            self.random_sampling(self.num_samples)
-            self.cell_size = self.min_radius / math.sqrt(3)
-            grid_partition = self.voxelize(self.cell_size)
-            valid_points = self.disk_sampling_3d(self.min_radius, grid_partition, self.cell_size)
+            elif self.mode == 3: #'poisson2d':
+                print('choosing')
+                self.geo_cache.create_uv_lookup()
+                self.disk_sampling_2d(self.min_radius_2d)
 
-        elif self.mode == 3: #'poisson2d':
-            self.geo_cache.create_uv_lookup()
-            self.disk_sampling_2d(self.min_radius_2d)
+            # get sampled points from disk or grid sampling
+            if self.mode == 1 or self.mode == 2:
+                point_data = Points()
+                point_data.set_length(len(valid_points))
+                for i, index in enumerate(valid_points):
+                    point_data.set(i,
+                                   self.point_data.position[index],
+                                   self.point_data.normal[index],
+                                   self.point_data.poly_id[index],
+                                   self.point_data.u_coord[index],
+                                   self.point_data.v_coord[index])
 
-        # get sampled points from disk or grid sampling
-        if self.mode == 1 or self.mode == 2:
-            point_data = Points()
-            point_data.set_length(len(valid_points))
-            for i, index in enumerate(valid_points):
-                point_data.set(i,
-                               self.point_data.position[index],
-                               self.point_data.normal[index],
-                               self.point_data.poly_id[index],
-                               self.point_data.u_coord[index],
-                               self.point_data.v_coord[index])
-
-            self.point_data = point_data
+                self.point_data = point_data
+        except Exception as e:
+            print('----> Error in initializing sampling at {}: {}'.format(e.__traceback__.tb_lineno, e))
 
     def initialize_filtering(self):
         # texture filter
@@ -338,7 +353,7 @@ class SporeSampler(ompx.MPxCommand):
             self.geo_cache.cache_geometry(in_mesh)
 
         self.point_data.set_length(num_points)
-        [self.sample_triangle(random.choice(self.geo_cache.weighted_ids), i) for i in xrange(num_points)]
+        [self.sample_triangle(random.choice(self.geo_cache.weighted_ids), i) for i in range(num_points)]
 
     def sample_triangle(self,triangle_id, point_id):
         """ sample a random point on a the given triangle """
@@ -375,7 +390,7 @@ class SporeSampler(ompx.MPxCommand):
         #  point_data.set_length(len(grid_partition))
 
         ids = []
-        for key, val in grid_partition.iteritems():
+        for key, val in grid_partition.items():
             ids.append(random.choice(val))
 
         return sorted(ids)
@@ -419,7 +434,7 @@ class SporeSampler(ompx.MPxCommand):
 
             # try k times to find a new sample
             k = 30
-            for i in xrange(k):
+            for i in range(k):
 
                 # get neighboring cell
                 new_p_x, new_p_y, new_p_z = self.get_valid_neighbouring_cell(p_grid_x, p_grid_y, p_grid_z)
@@ -428,8 +443,7 @@ class SporeSampler(ompx.MPxCommand):
                 key = new_p_x + new_p_y * self.w_count + new_p_z * self.w_count * self.h_count
 
                 # check if key is valid and if there isnt already a valid point...
-                if grid_partition.has_key(key)\
-                and not valid_points[key]:
+                if key in grid_partition and not valid_points[key]:
 
                     # get a random point from the list associated with the key
                     new_index = int(len(grid_partition[key]) * random.random())
@@ -442,9 +456,9 @@ class SporeSampler(ompx.MPxCommand):
 
                 valid = True
                 # check against all nearby cells if the sample is valid
-                for x in xrange(new_p_x - 1, new_p_x + 2):
-                    for y in xrange(new_p_y - 1, new_p_y + 2):
-                        for z in xrange(new_p_z - 1, new_p_z + 2):
+                for x in range(new_p_x - 1, new_p_x + 2):
+                    for y in range(new_p_y - 1, new_p_y + 2):
+                        for z in range(new_p_z - 1, new_p_z + 2):
 
                             # ignore invalid cells
                             if x < 0 or y < 0 or z < 0:
@@ -587,7 +601,7 @@ class SporeSampler(ompx.MPxCommand):
             found = False
 
             k = 30
-            for each in xrange(k):
+            for each in range(k):
 
                 # find a new point withhin a the range of radius - 2r
                 rand_distance = random.uniform(radius, 2 * radius)
@@ -611,8 +625,8 @@ class SporeSampler(ompx.MPxCommand):
                 and not grid[active_col + active_row * col]:
 
                     valid = True
-                    for j in xrange(-1, 2):
-                        for f in xrange(-1, 2):
+                    for j in range(-1, 2):
+                        for f in range(-1, 2):
                             index = (active_col + j) + (active_row + f) * col
                             try:
                                 neighbor = grid[index]
@@ -678,7 +692,7 @@ class SporeSampler(ompx.MPxCommand):
         self.d_count = int(math.ceil(bb.depth() / cell_size))
 
         bb_min = bb.min()
-        for i in xrange(self.point_data.position.length()):
+        for i in range(self.point_data.position.length()):
             p_normalized = self.point_data.position[i] - bb_min
             p_x = int(p_normalized.x / cell_size)
             p_y = int(p_normalized.y / cell_size)
@@ -743,7 +757,7 @@ class SporeSampler(ompx.MPxCommand):
         invalid_ids = []
         for i, (position, _, _, _, _) in enumerate(self.point_data):
             y_normalized = position[1] - bb_y_min
-            pos_rel = y_normalized / height
+            pos_rel = y_normalized // height
 
             if pos_rel < min_altitude:
                 if pos_rel < min_altitude - min_fuzziness:

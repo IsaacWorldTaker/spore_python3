@@ -24,7 +24,7 @@ class DrawOverride(canvas.Canvas):
 
         painter.begin(self)
 
-        print 'paint something', event
+        print('pint something', event)
         #  path = QPainterPath()
         painter.setPen(QPen(Qt.yellow, 5))
         painter.drawEllipse(50, 50, 50, 50)

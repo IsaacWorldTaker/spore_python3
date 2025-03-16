@@ -53,7 +53,7 @@ class SporeGlobals(QObject):
             raise KeyError('{} is not a valid option'.format(attr))
 
     def __iter__(self):
-        for attr, val in self.spore_globals.iteritems():
+        for attr, val in self.spore_globals.items():
             yield attr, val
 
     def parse_prefs(self):
@@ -78,7 +78,7 @@ class SporeGlobals(QObject):
     def fill_prefs_ui(self):
         """ fill the settings ui with existing globals """
 
-        for key, val in self: #.spore_globals.iteritems():
+        for key, val in self: #.spore_globals.items():
             self.ui.add_pref_wdg(key, val)
 
     #  def set_pref(self, pref, value):

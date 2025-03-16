@@ -52,7 +52,7 @@ class SporeManager(object):
     def remove_callbacks(self):
         """ remove callbacks """
 
-        for i in xrange(self.callbacks.length()):
+        for i in range(self.callbacks.length()):
             try:
                 om.MMessage.removeCallback(self.callbacks[i])
             except RuntimeError:
@@ -62,7 +62,7 @@ class SporeManager(object):
         """ link selection im maya to highligthing widgets in the manager """
 
         selection = cmds.ls(sl=True, typ='sporeNode', l=True)
-        for geo_item, spore_items in self.wdg_tree.iteritems():
+        for geo_item, spore_items in self.wdg_tree.items():
             for spore_item in spore_items:
                 if spore_item.node_name in selection:
                     spore_item.select()
@@ -82,7 +82,7 @@ class SporeManager(object):
         a SporeItem widget for each sporeNode connected to the mesh """
 
         targets = self.get_spore_setups()
-        for target, spore_nodes in targets.iteritems():
+        for target, spore_nodes in targets.items():
             geo_wdg = manager_ui.GeoItem(target) # , self.ui.spore_layout)
             geo_wdg.clicked.connect(self.item_clicked)
             self.ui.append_item(geo_wdg)
@@ -171,7 +171,7 @@ class SporeManager(object):
             if not is_modified:
                 cmds.select(clear=True)
 
-            for geo_item, spore_items in self.wdg_tree.iteritems():
+            for geo_item, spore_items in self.wdg_tree.items():
                 for spore_item in spore_items:
                     if is_modified \
                     and spore_item.is_selected:
@@ -204,7 +204,7 @@ class SporeManager(object):
         instancer = node_utils.get_instancer(widget.name)
         cmds.showHidden(instancer)
 
-        for geo_wdg, spore_wdgs in self.wdg_tree.iteritems():
+        for geo_wdg, spore_wdgs in self.wdg_tree.items():
             for spore_wdg in spore_wdgs:
                 if spore_wdg is not widget:
                     spore_wdg.view_buttons.solo_btn.setChecked(False)
@@ -243,11 +243,11 @@ class SporeManager(object):
 
         if action.text() == 'Delete':
             selection = cmds.ls(sl=1, typ='sporeNode')
-            for geo_wdg, spore_wdgs in self.wdg_tree.iteritems():
+            for geo_wdg, spore_wdgs in self.wdg_tree.items():
                 for spore_wdg in spore_wdgs:
 
                     spore_node = spore_wdg.name
-                    print spore_node
+                    print(spore_node)
                     if spore_wdg.is_selected and cmds.objExists(spore_node):
                         instancer = node_utils.get_instancer(spore_node)
                         transform = cmds.listRelatives(spore_node, p=True, f=True)

@@ -12,19 +12,19 @@ def active_view():
 def active_view_wdg():
     """ return the active 3d view wrapped in a QWidget """
     view = active_view()
-    active_view_widget = shiboken2.wrapInstance(long(view.widget()), QWidget)
+    active_view_widget = shiboken2.wrapInstance(int(view.widget()), QWidget)
     return active_view_widget
 
 def maya_main_window():
     """ return maya's main window wrapped in a QWidget """
     pointer_main_window = omui.MQtUtil.mainWindow()
     if pointer_main_window:
-        return shiboken2.wrapInstance(long(pointer_main_window), QWidget)
+        return shiboken2.wrapInstance(int(pointer_main_window), QWidget)
 
 def get_layout(layout):
     """ return a layout wraped as QObject """
     ptr = omui.MQtUtil.findLayout(layout)
-    return shiboken2.wrapInstance(long(ptr), QWidget) #.layout()
+    return shiboken2.wrapInstance(int(ptr), QWidget) #.layout()
 
 
 def world_to_view(position, invert_y=True):

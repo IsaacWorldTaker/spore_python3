@@ -34,7 +34,7 @@ def get_mesh_fn(target):
     :param target: dag path of the mesh
     :return MFnMesh """
 
-    if isinstance(target, str) or isinstance(target, unicode):
+    if isinstance(target, str):
         slls = om.MSelectionList()
         slls.add(target)
         ground_path = om.MDagPath()

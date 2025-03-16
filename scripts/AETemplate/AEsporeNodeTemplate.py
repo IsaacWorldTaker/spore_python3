@@ -34,7 +34,7 @@ class AEsporeNodeTemplate(AETemplate):
 
         self.beginScrollLayout()
         self.build_ui() # build bui
-        pm.mel.AElocatorInclude(node) # add defaul controls
+        pm.mel.AElocatorInclude(node) # add default controls
         self.addExtraControls('Extra Attributes') # add extra attributes
         self.endScrollLayout()
 
@@ -45,7 +45,7 @@ class AEsporeNodeTemplate(AETemplate):
     def __del__(self):
 
         self.logger.debug('Delete AETemplate object')
-        for i in xrange(self.callbacks.length()):
+        for i in range(self.callbacks.length()):
             self.logger.debug('Remove callback: {}'.format(self.callbacks[i]))
             om.Message().removeCallback(self.callbacks[i])
 
@@ -64,7 +64,7 @@ class AEsporeNodeTemplate(AETemplate):
         """ add callbacks """
 
         if self.callbacks.length() <= 1:
-            self.logger.debug('Add selection shanged callback')
+            self.logger.debug('Add selection changed callback')
             m_node = node_utils.get_mobject_from_name(self._node)
             self.callbacks.append(om.MEventMessage.addEventCallback('SelectionChanged', self.selection_changed))
 
@@ -89,7 +89,7 @@ class AEsporeNodeTemplate(AETemplate):
                 pass
 
     def selection_changed(self, *args):
-        """ make sure to opt out of the current spore tool when the selction
+        """ make sure to opt out of the current spore tool when the selection
         is changed """
 
         if cmds.currentCtx().startswith('spore'):
@@ -100,7 +100,9 @@ class AEsporeNodeTemplate(AETemplate):
 
         # instance source
         self.beginLayout('Instanced Objects', collapse=0)
-        self.callCustom(self.add_instance_list, self.update_instance_list)
+        cmds.editorTemplate(callCustom=(self.add_instance_list, self.update_instance_list))
+
+        # self.callCustom(self.add_instance_list, self.update_instance_list)
         self.endLayout()
 
         # placement options
@@ -116,7 +118,7 @@ class AEsporeNodeTemplate(AETemplate):
         self.addControl('maxScale', label='Max Scale')
         self.addControl('uniformScale', label='Uniform Scale',
                         changeCommand=self.uniform_scale_toggle,
-                        annotation='Scane Uniformly: Use X Values')
+                        annotation='Scan Uniformly: Use X Values')
         self.addControl('scaleFactor', label='Scale Factor')
         self.addControl('scaleAmount', label='Randomize / Smooth')
         self.dimControl(self._node, 'scaleFactor', True)
@@ -124,7 +126,7 @@ class AEsporeNodeTemplate(AETemplate):
         self.addControl('minOffset', label='Min Offset')
         self.addControl('maxOffset', label='Max Offset')
 
-        # preassure mapping controls # not implemented yet
+        # pressure mapping controls # not implemented yet
         #  self.addSeparator()
         #  self.addControl('minId', label='Min Id',
         #                  changeCommand=lambda _: self.index_cc('min'))
@@ -140,8 +142,10 @@ class AEsporeNodeTemplate(AETemplate):
 
         # brush attributes
         self.beginLayout('Brush', collapse=True)
-        self.callCustom(self.add_brush_btn, self.update_brush_btn,
-                        'contextMode')
+        cmds.editorTemplate(callCustom=(lambda: self.add_brush_btn(f'{self._node}.contextMode'), lambda: self.update_brush_btn(f'{self._node}.contextMode')))
+
+        # self.callCustom(self.add_brush_btn, self.update_brush_btn,
+        #                 'contextMode')
         self.addControl('brushRadius', label='Radius')
         self.addControl('numBrushSamples', label='Number Of Samples')
         self.addControl('minDistance', label='Min Distance')
@@ -186,13 +190,17 @@ class AEsporeNodeTemplate(AETemplate):
         self.addControl('slopeFuzz', 'Slope Fuzziness')
         self.endLayout()
         self.endLayout()
-        self.callCustom(self.add_emit_btn, self.update_emit_btn, "emit")
+        cmds.editorTemplate(callCustom=(lambda: self.add_emit_btn('emit'), lambda: self.update_emit_btn('emit')))
+
+        # self.callCustom(self.add_emit_btn, self.update_emit_btn, "emit")
         self.endLayout()
 
         # count layout
         self.beginLayout('Count', collapse=True)
         self.addControl('numSpores', label='Count')
-        self.callCustom(self.add_clear_btn, self.update_clear_btn, 'clear')
+        cmds.editorTemplate(callCustom=(lambda: self.add_clear_btn('clear'), lambda: self.update_clear_btn('clear')))
+
+        # self.callCustom(self.add_clear_btn, self.update_clear_btn, 'clear')
         self.endLayout()
 
         # geo cache layout
@@ -207,47 +215,49 @@ class AEsporeNodeTemplate(AETemplate):
     # ------------------------------------------------------------------------ #
 
     def add_instance_list(self, *args):
-        """ builde the instance list layout """
+        """ build the instance list layout """
+        try:
+            instanced_geo = node_utils.get_instanced_geo(self._node)
+            print('-----> instanced_geo', instanced_geo)
+            if instanced_geo:
+                instanced_geo = ['[{}]: {}'.format(i, name) for i, name in enumerate(instanced_geo)]
 
-        instanced_geo = node_utils.get_instanced_geo(self._node)
-        if instanced_geo:
-            instanced_geo = ['[{}]: {}'.format(i, name) for i, name in enumerate(instanced_geo)]
+            form = cmds.formLayout()
+            help_lbl = cmds.text(l='Select item(s) to specify an index',
+                                 align='left')
+            scroll_list = cmds.textScrollList('instanceList', ams=True,
+                                              append=instanced_geo)
+            add_btn = cmds.symbolButton('addInstanceBtn', width=30, i='setEdAddCmd.png',
+                                        c=pm.Callback(self.add_instance),
+                                        ann='Add Selected Object')
+            rm_btn = cmds.symbolButton('removeInstanceBtn', width=30,
+                                       i='setEdRemoveCmd.png',
+                                       c=pm.Callback(self.remove_instance),
+                                       ann='Remove Selected Objects')
+            instancer_btn = cmds.symbolButton('instancerBtn', width=30, i='info.png',
+                                              c=pm.Callback(self.select_instancer),
+                                              ann='Highlight Instancer')
 
-        form = cmds.formLayout()
-        help_lbl = cmds.text(l='Select item(s) to specify an index',
-                             align='left')
-        scroll_list = cmds.textScrollList('instanceList', ams=True,
-                                          append=instanced_geo)
-        add_btn = cmds.symbolButton('addInstanceBtn', width=30, i='setEdAddCmd.png',
-                                    c=pm.Callback(self.add_instance),
-                                    ann='Add Selected Object')
-        rm_btn = cmds.symbolButton('removeInstanceBtn', width=30,
-                                   i='setEdRemoveCmd.png',
-                                   c=pm.Callback(self.remove_instance),
-                                   ann='Remove Selected Objects')
-        instancer_btn = cmds.symbolButton('instancerBtn', width=30, i='info.png',
-                                          c=pm.Callback(self.select_instancer),
-                                          ann='Highlight Instancer')
-
-        cmds.formLayout(form, e=True, height=115,
-                        attachForm=[(help_lbl, 'left', 2),
-                                    (help_lbl, 'right', 2),
-                                    (help_lbl, 'top', 0),
-                                    (add_btn, 'right', 2),
-                                    (add_btn, 'top', 17),
-                                    (rm_btn, 'top', 45),
-                                    (rm_btn, 'right', 2),
-                                    (instancer_btn, 'right', 2),
-                                    (instancer_btn, 'bottom', 2),
-                                    (scroll_list, 'right', 35),
-                                    (scroll_list, 'top', 17),
-                                    (scroll_list, 'left', 2),
-                                    (scroll_list, 'bottom', 2)])
-
+            cmds.formLayout(form, e=True, height=115,
+                            attachForm=[(help_lbl, 'left', 2),
+                                        (help_lbl, 'right', 2),
+                                        (help_lbl, 'top', 0),
+                                        (add_btn, 'right', 2),
+                                        (add_btn, 'top', 17),
+                                        (rm_btn, 'top', 45),
+                                        (rm_btn, 'right', 2),
+                                        (instancer_btn, 'right', 2),
+                                        (instancer_btn, 'bottom', 2),
+                                        (scroll_list, 'right', 35),
+                                        (scroll_list, 'top', 17),
+                                        (scroll_list, 'left', 2),
+                                        (scroll_list, 'bottom', 2)])
+        except Exception as e:
+            print('-----> error in add_instance_list at {}: {}'.format(e.__traceback__.tb_lineno, e))
     def update_instance_list(self, *args):
-        """ update the instance listi.
-        1. try to get current node based on ae tab name. this failse if the
-           nodename is not unique. if this happends...
+        """ update the instance list.
+        1. try to get current node based on ae tab name. this false if the
+           node name is not unique. if this happens...
         2. try to get the node based on last item in selection. this fails
            if not the item is not a spore shape or spore transform.
         this method fails when:
@@ -371,7 +381,7 @@ class AEsporeNodeTemplate(AETemplate):
         or cmds.getAttr(transform + '.scaleX') != 1\
         or cmds.getAttr(transform + '.scaleY') != 1\
         or cmds.getAttr(transform + '.scaleZ') != 1:
-            msg = 'Feeze transformations to sample the geomety!'
+            msg = 'Freeze transformations to sample the geometry!'
             result = message_utils.IOHandler().confirm_dialog(msg, 'Freeze Transformations')
             if result:
                 cmds.makeIdentity(transform, a=True, s=True, r=True, t=True, n=0)
@@ -533,7 +543,7 @@ class AEsporeNodeTemplate(AETemplate):
         if emit_type == 1:
             cell_size = cmds.getAttr(self._node + '.cellSize')
         elif emit_type == 2:
-            cell_size = cmds.getAttr(self._node + '.minRadius') / math.sqrt(3)
+            cell_size = cmds.getAttr(self._node + '.minRadius') // math.sqrt(3)
         else:
             return
 
@@ -611,7 +621,7 @@ class AEsporeNodeTemplate(AETemplate):
 def get_nav_layout():
 
     def find_first_frame_layout(layout):
-        """ recursivley get all child layout until we find the first framelayout """
+        """ recursively get all child layout until we find the first frame layout """
 
         children = cmds.layout(layout, ca=True, q=True)
         for child in children:
@@ -624,5 +634,5 @@ def get_nav_layout():
 
 
     nav_layout = find_first_frame_layout('AttrEdsporeNodeFormLayout')
-    return wrapInstance(long(omui.MQtUtil.findControl(nav_layout)), QWidget)
+    return wrapInstance(int(omui.MQtUtil.findControl(nav_layout)), QWidget)
 

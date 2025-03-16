@@ -41,7 +41,7 @@ class Reporter(object):
     def get_log_content(self):
         """ get the content of all log files """
 
-        if os.environ.has_key('SPORE_LOG_DIR'):
+        if 'SPORE_LOG_DIR' is os.environ:
             log_content = ''
 
             log_file = os.path.join(os.environ['SPORE_LOG_DIR'], 'spore.log')

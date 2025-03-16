@@ -2,8 +2,10 @@ import os
 import sys
 import time
 import urllib
-import urllib2
-
+from urllib.parse import urlencode
+import urllib.request
+from urllib.request import Request, build_opener, HTTPHandler
+from urllib.error import HTTPError
 from PySide2.QtCore import QTimer
 
 import maya.cmds as cmds
@@ -62,15 +64,15 @@ class MailWrapper(object):
                 self.timer.stop()
                 return
 
-        handler = urllib2.HTTPHandler()
-        opener = urllib2.build_opener(handler)
-        data = urllib.urlencode(payload)
-        request = urllib2.Request(self.MAIL_URL, data=data)
+        handler = HTTPHandler()
+        opener = build_opener(handler)
+        data = urlencode(payload).encode('utf-8')
+        request = Request(self.MAIL_URL, data=data)
         request.get_method = lambda: "POST"
 
         try:
             connection = opener.open(request)
-        except urllib2.HTTPError, e:
+        except HTTPError as e:
             connection = e
 
         self.last_msg = time.time()
@@ -79,7 +81,7 @@ class MailWrapper(object):
         if connection.code == 200:
             data = connection.read()
             self.logger.debug('Report {} delivered'.format(payload['subject']))
-            print '=' * 40 + '\nThank you for submitting your report!\n' + '=' * 40
+            print('=' * 40 + '\nThank you for submitting your report!\n' + '=' * 40)
             return True
         else:
             self.logger.error('Could not send report, error code: {}'.format(connection))

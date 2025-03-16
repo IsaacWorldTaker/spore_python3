@@ -1,7 +1,7 @@
 import os
 import sys
 import unittest
-import __builtin__
+import builtins
 
 import maya.cmds as cmds
 
@@ -101,7 +101,7 @@ class RollbackImporter(object):
     def _import(self, name, globals=None, locals=None, fromlist=[]):
         """ overwirte the builtin import functionality """
 
-        print 'import', name, globals, locals, fromlist
+        print('import', name, globals, locals, fromlist)
         result = apply(self.real_import, (name, globals, locals, fromlist))
         self.newModules[name] = 1
         return result

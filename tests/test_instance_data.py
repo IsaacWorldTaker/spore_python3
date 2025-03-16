@@ -49,7 +49,7 @@ class TestInstanceData(TestCase):
                                          v_coord, poly_id, color)
         self.assertTrue(self.instance_data.is_valid)
 
-        for i in xrange(length * 2):
+        for i in range(length * 2):
             self.assertEqual(i, self.instance_data.unique_id[i])
 
 
@@ -192,7 +192,7 @@ class TestInstanceData(TestCase):
         """ validate the instance data object """
         self.assertTrue(self.instance_data.is_valid)
         self.assertEqual(len(self.instance_data), predicted_length)
-        for i in xrange(len(self.instance_data)):
+        for i in range(len(self.instance_data)):
             self.assertEqual(self.instance_data.unique_id[i], i)
             self.assertEqual(self.instance_data.position[i].x,
                              self.instance_data.np_position[i][0])
@@ -222,7 +222,7 @@ def create_test_data(length):
         """ validate the instance data object """
         self.assertTrue(self.instance_data.is_valid)
         self.assertEqual(len(self.instance_data), predicted_length)
-        for i in xrange(len(self.instance_data)):
+        for i in range(len(self.instance_data)):
             self.assertEqual(self.instance_data.unique_id[i], i)
             self.assertEqual(self.instance_data.position[i].x,
                              self.instance_data.np_position[i][0])
@@ -248,7 +248,7 @@ def create_test_data(length):
     v_coord = om.MIntArray()
     poly_id = om.MIntArray()
     color = om.MVectorArray()
-    for i in xrange(length):
+    for i in range(length):
         position.append(om.MVector(i, i, i))
         scale.append(om.MVector(i, i, i))
         rotation.append(om.MVector(i, i, i))

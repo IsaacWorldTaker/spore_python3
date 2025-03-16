@@ -82,7 +82,7 @@ class InstanceData(object):
         # TODO - set bb
 
         # get position as numpy array
-        for i in xrange(self.position.length()):
+        for i in range(self.position.length()):
             position = [[self.position[i].x, self.position[i].y, self.position[i].z]]
             self.np_position = np.append(self.np_position, position, axis=0)
 
@@ -124,7 +124,7 @@ class InstanceData(object):
         :return: """
 
         appended_ids = om.MIntArray()
-        for i in xrange(position.length()):
+        for i in range(position.length()):
             self.position.append(position[i])
             self.scale.append(scale[i])
             self.rotation.append(rotation[i])
@@ -202,7 +202,7 @@ class InstanceData(object):
                 return
 
         # set points
-        for i in xrange(len(index)):
+        for i in range(len(index)):
             if position:
                 self.position.set(position[i], index[i])
                 self.np_position.itemset((index[i], 0), position[i].x)
@@ -305,7 +305,7 @@ class InstanceData(object):
         """ make sure each point has a unique id.
         this method should be called after inserting or deleting points """
 
-        for i in xrange(len(self) - 1):
+        for i in range(len(self) - 1):
             self.unique_id[i] = i
 
     def length(self):
@@ -320,7 +320,7 @@ class InstanceData(object):
 
         if refresh_position:
             self.np_position = np.empty((0, 3), float)
-            for i in xrange(self.position.length()):
+            for i in range(self.position.length()):
                 position = [[self.position[i].x, self.position[i].y, self.position[i].z]]
                 self.np_position = np.append(self.np_position, position, axis=0)
 
@@ -455,7 +455,7 @@ class InstanceData(object):
     def clear(self):
         """ remove all points from the object """
 
-        [self.visibility.set(0, i) for i in xrange(self.visibility.length())]
+        [self.visibility.set(0, i) for i in range(self.visibility.length())]
         self.clean_up()
         self.set_state()
 
@@ -469,7 +469,7 @@ class InstanceData(object):
             self.logger.error('Cleanup operation failed, Instance Data is out of sync.')
             return
 
-        invalid_ids = sorted([i for i in xrange(self.visibility.length()) if self.visibility[i] == 0],
+        invalid_ids = sorted([i for i in range(self.visibility.length()) if self.visibility[i] == 0],
                              reverse=True)
 
         if invalid_ids:
@@ -494,7 +494,7 @@ class InstanceData(object):
         return self.position.length()
 
     def __iter__(self):
-        for i in xrange(self.position.length()):
+        for i in range(self.position.length()):
             point = {'position': self.position[i],
                      'scale': self.scale[i],
                      'rotation': self.rotation[i],

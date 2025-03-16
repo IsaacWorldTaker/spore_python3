@@ -32,7 +32,7 @@ def global_reload():
     windowed = mel.eval('$temp1=$gMainWindow')
     if windowed:
         scripts_dir = os.path.dirname(__file__)
-        for key, module in sys.modules.iteritems():
+        for key, module in sys.modules.items():
 
             try:
                 module_path = inspect.getfile(module)
@@ -108,7 +108,7 @@ class GlobalSporeDispatcher(object):
         pm.menuItem(divider=True)
         pm.menuItem(l='Spore Globals', c='import sys;sys._global_spore_dispatcher.spore_globals.show()', parent=menu)
         pm.menuItem(l='Spore Reporter', c='import sys;sys._global_spore_dispatcher.spore_reporter.show()', parent=menu)
-        pm.menuItem(l='Help', c='print help', parent=menu)
+        pm.menuItem(l='Help', c='print(help)', parent=menu)
 
         if os.environ.get('SPORE_DEV_MODE', '0') == '1':
             pm.menuItem(l='Run tests', c='import test_util;test_util.run_tests_from_maya', parent=menu)
@@ -135,7 +135,7 @@ class GlobalSporeDispatcher(object):
         """ remove the scene callabacks """
 
         self.logger.debug('Remove callbacks...')
-        for i in xrange(self.callbacks.length()):
+        for i in range(self.callbacks.length()):
             callback = self.callbacks[i]
             om.MSceneMessage.removeCallback(callback)
 

@@ -70,7 +70,7 @@ class GeoCache(object):
         tri_points = om.MPointArray()
         vert_ids = om.MIntArray()
         tris_area = []
-        smallest_tri = None
+        smallest_tri = float('inf')
 
         # iter mesh
         poly_iter = om.MItMeshPolygon(self.mesh)
@@ -81,7 +81,7 @@ class GeoCache(object):
             poly_iter.getTriangles(tri_points, vert_ids, om.MSpace.kWorld)
 
             # get triangle data
-            for i in xrange(tri_points.length() / 3):
+            for i in range(tri_points.length() // 3):
                 p0 = tri_points[i * 3]
                 p1 = tri_points[i * 3 + 1]
                 p2 = tri_points[i * 3 + 2]
@@ -146,7 +146,7 @@ class GeoCache(object):
 
             index = vert_iter.index()
             vert_iter.getConnectedFaces(connected_faces)
-            self.neighbor_lookup[index] = [connected_faces[i] for i in xrange(connected_faces.length())]
+            self.neighbor_lookup[index] = [connected_faces[i] for i in range(connected_faces.length())]
 
             util.createFromDouble(0.0, 0.0)
             uv_ptr = util.asFloat2Ptr()
@@ -177,7 +177,7 @@ class GeoCache(object):
             self.logger.debug('Validate GeoCache succeded')
             return False
 
-        for i in xrange(points.length()):
+        for i in range(points.length()):
             if points[i] != self.poly_verts[i]:
                 self.logger.debug('Validate GeoCache failed')
                 return False

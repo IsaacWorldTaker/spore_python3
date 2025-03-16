@@ -60,8 +60,8 @@ def sample_shading_node(shading_node, point_data, filter_size=0):
                                         color,
                                         alpha)
 
-    color_result = [(color[i].x, color[i].y, color[i].z) for i in xrange(color.length())]
-    alpha_result = [(alpha[i].x, alpha[i].y, alpha[i].z) for i in xrange(alpha.length())]
+    color_result = [(color[i].x, color[i].y, color[i].z) for i in range(color.length())]
+    alpha_result = [(alpha[i].x, alpha[i].y, alpha[i].z) for i in range(alpha.length())]
 
     cmds.delete((shd, shd_grp))
     cmds.select(old_selection)

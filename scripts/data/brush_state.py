@@ -65,7 +65,6 @@ class BrushState(object):
 
     def get_brush_settings(self):
         """ fetch brush setting from the node and save it to the "state" dict """
-
         # get selected item from node's textScrollList
         sel = cmds.textScrollList('instanceList', q=True, si=True)
         if sel:
@@ -161,7 +160,7 @@ class BrushState(object):
                 # get circle points
                 theta = math.radians(360 / 20)
                 shape = []
-                for i in xrange(20 + 1):
+                for i in range(20 + 1):
                     rot = om.MQuaternion(theta * i, nrm)
                     rtan = tan.rotateBy(rot)
                     pos = pnt + (rtan * self._radius)
@@ -172,8 +171,8 @@ class BrushState(object):
                 return [shape]
 
     def world_to_view(self, position, invert_y=True):
-        """ convert the given 3d position to 2d viewpor coordinates
-        :param invert_y bool: convert between qt and maya coordinane space """
+        """ convert the given 3d position to 2d viewport coordinates
+        :param invert_y bool: convert between qt and maya coordinate space """
 
         view = window_utils.active_view()
         x_util = om.MScriptUtil()

@@ -1,4 +1,4 @@
-""" this module provides command line acces to unittesting with
+""" this module provides command line access to unit-testing with
 maya's python interpreter
 CREDIT GOES TO CHAD VERNONE
 http://www.chadvernon.com/blog/unit-testing-in-maya/ """
@@ -91,7 +91,7 @@ def main():
     try:
         subprocess.check_call(cmd)
     except subprocess.CalledProcessError:
-        print 'subprocess returned zero'
+        print('subprocess returned zero')
     finally:
         shutil.rmtree(pref_dir)
 

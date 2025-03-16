@@ -1,5 +1,6 @@
 import os
 import sys
+from importlib import reload
 
 import maya.mel as mel
 import pymel.core as pm
@@ -8,8 +9,8 @@ import maya.cmds as cmds
 import maya.OpenMaya as om
 import maya.OpenMayaMPx as ompx
 
-# first instantiatet the global spore dispatcher class
-# this must be the first thing bevore we import any of the plugins
+# first instantiate the global spore dispatcher class
+# this must be the first thing before we import any of the plugins
 import dispatcher
 reload(dispatcher)
 sys._global_spore_dispatcher = dispatcher.GlobalSporeDispatcher()
@@ -33,7 +34,7 @@ if os.environ.get('SPORE_DEV_MODE', '0') == '1':
 def initializePlugin(mobject):
     """ initialize plugins. this is the entry point for spore.
     as soon as maya loads the spore plugin the initializePlugin function is
-    called which is also triggers everythin to set up. """
+    called which is also triggers everything to set up. """
 
     sys._global_spore_dispatcher.logger.debug('Loading Spore plugin')
     mplugin = ompx.MFnPlugin(mobject, 'Anno Schachner', 'v0.1.0.beta')
@@ -45,7 +46,9 @@ def initializePlugin(mobject):
                              spore_node.SporeNode.initialize,
                              ompx.MPxLocatorNode.kLocatorNode)
                              #  ompx.MPxNode.kDependNode)
-    except:
+        print('--------------------> nodes registered')
+    except Exception as e:
+        print('--------------------> failed to register nodes', e)
         sys.stderr.write("Failed to register node: %s" % spore_node.SporeNode.name)
         raise
 
@@ -76,7 +79,7 @@ def initializePlugin(mobject):
 
 
 def uninitializePlugin(mobject):
-    """ uninitialize plugins in reverse order & delete menu """
+    """ uninitialized plugins in reverse order & delete menu """
 
     sys._global_spore_dispatcher.logger.debug('Unloading Spore plugin')
     mplugin = ompx.MFnPlugin(mobject)

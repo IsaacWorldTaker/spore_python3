@@ -45,7 +45,7 @@ class SettingsUI(MayaQWidgetDockableMixin, QWidget):
             wdg = BoolWidget(name, value)
             self.layout.insertWidget(0, wdg)
             self.pref_tracking_dir[wdg.name_lbl] = wdg.bool_cbx
-        elif isinstance(value, str) or isinstance(value, unicode):
+        elif isinstance(value, str):
             wdg = StringWidget(name, value)
             self.layout.insertWidget(0, wdg)
             self.pref_tracking_dir[wdg.name_lbl] = wdg.line_edt
@@ -58,7 +58,7 @@ class SettingsUI(MayaQWidgetDockableMixin, QWidget):
             self.layout.insertWidget(0, wdg)
             self.pref_tracking_dir[wdg.name_lbl] = wdg.float_spn
         else:
-            print 'no assignment for', name, value, type(value)
+            print('no assignment for', name, value, type(value))
             pass
 
     def about_to_save(self):
@@ -67,7 +67,7 @@ class SettingsUI(MayaQWidgetDockableMixin, QWidget):
 
         #  self.logger.debug('About to emit save settings.')
         prefs = {}
-        for attr_lbl, val_wdg in self.pref_tracking_dir.iteritems():
+        for attr_lbl, val_wdg in self.pref_tracking_dir.items():
             attr = attr_lbl.text()
 
             val = None

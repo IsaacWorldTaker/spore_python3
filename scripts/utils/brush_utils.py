@@ -13,7 +13,7 @@ def get_rotation(initial_rotation, dir_vector, vector_weight):
     :param min_rotation tuple(x,y,z): minimum rotation values
     :param max_rotation tuple(x,y,z): maximum rotation values
     :param dir_vector MVector: direction of instance y-up
-    :param weight float(0-1): the weigth of the direction
+    :param weight float(0-1): the weigh of the direction
     :return MVector: Mvector containing euler rotation values """
 
     world_up = om.MVector(0, 1, 0)
@@ -43,7 +43,7 @@ def get_scale(min_scale, max_scale, uniform=True):
     :param min_scale tupe(x,y,z)
     :param max_scale tupe(x,y,z)
     :param uniform bool: if True get a uniform x,y,z scale
-    :return MVector: conaining scale values"""
+    :return MVector: containing scale values"""
 
     if uniform:
         scale_x = scale_y = scale_z = random.uniform(min_scale[0], max_scale[0])

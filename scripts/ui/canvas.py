@@ -136,7 +136,7 @@ class CircularBrush(Canvas):
             shape = []
             # get circle points
             theta = math.radians(360 / 20)
-            for i in xrange(40 + 1):
+            for i in range(40 + 1):
                 rot = om.MQuaternion(theta * i, nrm)
                 rtan = tan.rotateBy(rot)
                 pos = pnt + (rtan * self.brush_state.radius)
@@ -186,7 +186,7 @@ class HelpDisplay(Canvas):
         layout.addWidget(key_lbl, 1, 0, 1, 2)
 
         position = 2
-        for key, op in self.mapping.iteritems():
+        for key, op in self.mapping.items():
 
             key_lbl = QLabel(key)
             layout.addWidget(key_lbl, position, 0, 1, 1)

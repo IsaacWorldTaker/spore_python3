@@ -157,7 +157,7 @@ class PointData(PtcCache):
         self.__add__(ptc)
 
     def __add__(self, ptc):
-        for i in xrange(ptc.length()):
+        for i in range(ptc.length()):
             self.append(ptc.points[i],
                      ptc.normals[i],
                      ptc.u_coords[i],

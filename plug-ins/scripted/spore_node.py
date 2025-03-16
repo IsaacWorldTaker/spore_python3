@@ -545,11 +545,11 @@ class SporeNode(ompx.MPxLocatorNode): #Node):
     def pre_destructor(self, *args):
         """ called before node is deleted. used to clean stuff up """
 
-        for i in xrange(self.callbacks.length()):
+        for i in range(self.callbacks.length()):
             om.MMessage().removeCallback(self.callbacks[i])
 
         obj_handle = om.MObjectHandle(self.thisMObject())
-        if sys._global_spore_tracking_dir.has_key(obj_handle.hashCode()):
+        if obj_handle.hashCode() in sys._global_spore_tracking_dir:
             del sys._global_spore_tracking_dir[obj_handle.hashCode()]
 
     def compute(self, plug, data):
@@ -572,7 +572,7 @@ class SporeNode(ompx.MPxLocatorNode): #Node):
                 # object for the current inmesh
                 # note: this does not ensure that the cache is up to date!
                 found = False
-                for key, node in sys._global_spore_tracking_dir.iteritems():
+                for key, node in sys._global_spore_tracking_dir.items():
                     other_in_mesh = node_utils.get_connected_in_mesh(node.thisMObject())
                     in_mesh = node_utils.get_connected_in_mesh(self.thisMObject())
                     if in_mesh == other_in_mesh and node != self:
